@@ -1,0 +1,17 @@
+(() => {
+ const $=s=>document.querySelector(s);const intro=$('#intro'),site=$('#site'),enter=$('#enter-btn');
+ function enterSite(){intro.classList.add('dismissed');site.classList.remove('hidden');site.style.visibility='visible';site.style.opacity='1';document.body.style.overflowX='hidden';if(window.gsap)gsap.from('.hero > *',{y:24,opacity:0,duration:1,stagger:.12,ease:'power3.out',delay:.2});}
+ enter?.addEventListener('click',enterSite);
+ // Also allow direct access if JavaScript animations are disabled or visitor revisits.
+ setTimeout(()=>{if(!intro.classList.contains('dismissed'))enterSite()},12000);
+ $('#replay-btn')?.addEventListener('click',()=>{window.scrollTo({top:0,behavior:'smooth'});intro.classList.remove('dismissed');site.classList.add('hidden');site.style.opacity='0';});
+ $('#letter-btn')?.addEventListener('click',()=>{$('#envelope').classList.toggle('open');$('#letter-text').classList.add('show');$('#letter-btn').textContent='A message to keep close ✨';});
+ $('#secret-star')?.addEventListener('click',()=>$('#secret-modal').classList.add('open'));$('#secret-close')?.addEventListener('click',()=>$('#secret-modal').classList.remove('open'));$('#secret-modal')?.addEventListener('click',e=>{if(e.target.id==='secret-modal')e.currentTarget.classList.remove('open')});
+ // Original gentle two-note ambient sound; only starts after an explicit click.
+ let audio=null,playing=false,oscillators=[];const music=$('#music-btn');music?.addEventListener('click',async()=>{try{if(!audio){const Ctx=window.AudioContext||window.webkitAudioContext;audio=new Ctx();}if(audio.state==='suspended')await audio.resume();if(playing){oscillators.forEach(o=>{try{o.stop()}catch(_){}});oscillators=[];playing=false;music.innerHTML='♫ <span>Music</span>';return;}[261.63,329.63,392,329.63].forEach((freq,i)=>{const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.value=.018;o.connect(g);g.connect(audio.destination);o.start();oscillators.push(o);});playing=true;music.innerHTML='♫ <span>On</span>'; }catch(e){music.title='Audio is unavailable in this browser';}});
+ const form=$('#wish-form'),wall=$('#wish-wall'),status=$('#form-status');
+ function card(w){const el=document.createElement('article');el.className='wish-card';const emoji=document.createElement('div');emoji.className='wish-emoji';emoji.textContent=w.emoji||'✨';const name=document.createElement('h4');name.textContent=w.name;const message=document.createElement('p');message.textContent=w.message;el.append(emoji,name,message);return el;}
+ async function loadWishes(){try{const res=await fetch('/api/wishes');if(!res.ok)throw Error();const wishes=await res.json();wall.replaceChildren(...wishes.map(card));}catch(e){status.textContent='The wish wall could not load just now.';}}
+ form?.addEventListener('submit',async e=>{e.preventDefault();const data=new FormData(form);const payload={name:data.get('name'),message:data.get('message'),emoji:data.get('emoji')};status.textContent='Sending your wish...';try{const res=await fetch('/api/wishes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!res.ok)throw Error('Please check your message and try again.');const wish=await res.json();wall.prepend(card(wish));form.reset();status.textContent='Your wish has joined the celebration. Thank you! ✨';}catch(err){status.textContent=err.message||'Could not send your wish. Please try again.';}});
+ loadWishes();
+})();

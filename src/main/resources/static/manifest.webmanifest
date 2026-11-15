@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "Birthday Universe",
+  "short_name": "Birthday",
+  "description": "A little universe made to celebrate someone extraordinary.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090611",
+  "theme_color": "#090611",
+  "icons": [
+    { "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
